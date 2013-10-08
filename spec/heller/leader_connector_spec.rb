@@ -5,7 +5,7 @@ require 'spec_helper'
 module Heller
   describe LeaderConnector do
     let :leader_connector do
-      described_class.new(consumer_impl: consumer_impl)
+      described_class.new(options)
     end
 
     let :consumer_impl do
@@ -22,6 +22,14 @@ module Heller
 
     let :fake_broker do
       double(:broker)
+    end
+
+    let :options do
+      {consumer_impl: consumer_impl}.merge(consumer_options)
+    end
+
+    let :consumer_options do
+      {timeout: 2 * 1000, client_id: 'spec-leader-lookup'}
     end
 
     let :brokers do
@@ -47,7 +55,13 @@ module Heller
       it 'connects to a broker' do
         leader_connector.connect(brokers, topic, partition)
 
-        expect(consumer_impl).to have_received(:new).with('localhost:9092', {})
+        expect(consumer_impl).to have_received(:new).with('localhost:9092', consumer_options)
+      end
+
+      it 'uses given options when creating consumer' do
+        leader_connector.connect(brokers, topic, partition)
+
+        expect(consumer_impl).to have_received(:new).with('localhost:9092', consumer_options)
       end
 
       it 'sends a #metadata request' do
@@ -70,7 +84,7 @@ module Heller
         it 'connects to leader' do
           leader_connector.connect(brokers, topic, partition)
 
-          expect(consumer_impl).to have_received(:new).with('localhost:9093', {})
+          expect(consumer_impl).to have_received(:new).with('localhost:9093', consumer_options)
         end
 
         it 'returns a consumer' do
