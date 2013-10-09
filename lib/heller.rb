@@ -52,6 +52,7 @@ module Heller
 
   module Concurrency
     java_import 'java.util.concurrent.locks.ReentrantLock'
+    java_import 'java.lang.Thread'
 
     class Lock
       def initialize

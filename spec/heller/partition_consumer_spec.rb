@@ -84,6 +84,38 @@ module Heller
 
         consumer.fetch
       end
+
+      context 'when errors are raised by Kafka' do
+        let :error do
+          Kafka::Errors::NotLeaderForPartitionException.new
+        end
+
+        it 'retries fetching messages' do
+          first_error = true
+          fake_consumer.stub(:fetch) do
+            if first_error
+              first_error = false
+              raise error
+            end
+          end
+
+          consumer.fetch
+
+          expect(fake_consumer).to have_received(:fetch).twice
+        end
+
+        it 'does :max_retries attempts and then re-raises error' do
+          tries = 0
+          fake_consumer.stub(:fetch) do
+            if tries < 4
+              tries += 1
+              raise error
+            end
+          end
+
+          expect { consumer.fetch }.to raise_error(error)
+        end
+      end
     end
 
     describe '#earliest_offset' do
@@ -104,6 +136,38 @@ module Heller
 
         expect(fake_consumer).to have_received(:earliest_offset).with('topic', 1337)
       end
+
+      context 'when NotLeaderForPartitionException is raised by Kafka' do
+        let :error do
+          Kafka::Errors::NotLeaderForPartitionException.new
+        end
+
+        it 'retries fetching earliest offset' do
+          first_error = true
+          fake_consumer.stub(:earliest_offset) do
+            if first_error
+              first_error = false
+              raise error
+            end
+          end
+
+          consumer.earliest_offset
+
+          expect(fake_consumer).to have_received(:earliest_offset).twice
+        end
+
+        it 'does :max_retries attempts and then re-raises error' do
+          tries = 0
+          fake_consumer.stub(:earliest_offset) do
+            if tries < 4
+              tries += 1
+              raise error
+            end
+          end
+
+          expect { consumer.earliest_offset }.to raise_error(error)
+        end
+      end
     end
 
     describe '#latest_offset' do
@@ -123,6 +187,38 @@ module Heller
         consumer.latest_offset
 
         expect(fake_consumer).to have_received(:latest_offset).with('topic', 1337)
+      end
+
+      context 'when NotLeaderForPartitionException is raised by Kafka' do
+        let :error do
+          Kafka::Errors::NotLeaderForPartitionException.new
+        end
+
+        it 'retries fetching latest offset' do
+          first_error = true
+          fake_consumer.stub(:latest_offset) do
+            if first_error
+              first_error = false
+              raise error
+            end
+          end
+
+          consumer.latest_offset
+
+          expect(fake_consumer).to have_received(:latest_offset).twice
+        end
+
+        it 'does :max_retries attempts and then re-raises error' do
+          tries = 0
+          fake_consumer.stub(:latest_offset) do
+            if tries < 4
+              tries += 1
+              raise error
+            end
+          end
+
+          expect { consumer.latest_offset }.to raise_error(error)
+        end
       end
     end
 

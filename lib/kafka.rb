@@ -48,5 +48,17 @@ module Kafka
 
   module Errors
     java_import 'kafka.common.ErrorMapping'
+    java_import 'kafka.common.UnknownException'
+    java_import 'kafka.message.InvalidMessageException'
+    java_import 'kafka.common.OffsetOutOfRangeException'
+    java_import 'kafka.common.UnknownTopicOrPartitionException'
+    java_import 'kafka.common.InvalidMessageSizeException'
+    java_import 'kafka.common.LeaderNotAvailableException'
+    java_import 'kafka.common.NotLeaderForPartitionException'
+    java_import 'kafka.common.RequestTimedOutException'
+    java_import 'kafka.common.BrokerNotAvailableException'
+    java_import 'kafka.common.ReplicaNotAvailableException'
+    java_import 'kafka.common.MessageSizeTooLargeException'
+    java_import 'kafka.common.ControllerMovedException'
   end
 end
